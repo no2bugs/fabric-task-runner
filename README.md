@@ -58,12 +58,24 @@ shell#: fab run_task
 ```
 shell#: fab run_task 2>&1 | tee -a log.txt
 ```
+- redirect to syslog
+```
+shell#: fab run_task | logger -s -t task
+```
 
 #### Scheduling
 *Add fab task to cron*
 
+- with log file
 ```bash
 # run job every hour
 0 * * * * fab run_task 2>&1 | tee -a log.txt
+
+```
+
+- to syslog
+```bash
+# run job every hour
+0 * * * * fab run_task | logger -s -t task
 
 ```
