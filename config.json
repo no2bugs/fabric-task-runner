@@ -1,0 +1,21 @@
+{
+    "ssh_user":     "ec2-user",
+    "task":         "job.sh",
+    "auto_retry":   "False",
+    "slack_api":    "https://hooks.slack.com/services/a/b/token",
+    "dd_api_key":   "api_key",
+    "dd_app_key":   "app_key",
+    "hosts": [
+                    "node1",
+                    "node2",
+                    "node3",
+                    "node4",
+                    "node5",
+                    "node6",
+                    "node7",
+                    "node8",
+                    "node9",
+                    "node10"
+
+    ]
+}
