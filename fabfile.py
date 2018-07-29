@@ -69,7 +69,7 @@ def check_local_fab():
 
 
 # checks if task is already running on any remote host
-# if backoff is set to True, it will auto-retry every 5 minutes
+# if backoff is set to True, it will auto-retry every 'retry_sec' seconds
 def check_remote_task(servers, backoff, job):
     try:
         for each in servers:
