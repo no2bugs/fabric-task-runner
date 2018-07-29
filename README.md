@@ -1,7 +1,6 @@
-# Remote Task Runner
+# Remote Job Runner
 
-**This script runs a task on remote host/s using Python fabric synchroneously (prevents concurrency)**
-
+**Runs a task on remote host using Python fabric synchroneously (prevents concurrency)**
 
 #### Features:
 * Reads all options from config file
@@ -10,16 +9,16 @@
 * Notifies Slack and posts status to Datadog
 * Sends task output to syslog on remote host
 
-
-
 #### External module dependencies:
-1. fabric
+1. fabric3
 2. datadog
+2. requests
 
 #### Getting Started:
-1. `pip install fabric`  
-2. `pip install datadog`
-3. Set values in config.json
+1. `pip install fabric3 --user`  
+2. `pip install datadog --user`
+3. `pip install requests --user`
+4. Set values in config.json
 
 ```
 {
@@ -60,7 +59,6 @@
 - **hosts**: *host/s for task to run on*
 
 #### Running Task
-
 - without local log file
 ```
 shell#: fab run_task
