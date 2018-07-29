@@ -26,7 +26,10 @@
     "ssh_user":     "ec2-user",
     "task":         "job.sh",
     "auto_retry":   "False",
+    "retry_sec":    "300",
+    "slack":        "Enable",
     "slack_api":    "https://hooks.slack.com/services/a/b/token",
+    "datadog":      "Enable",
     "dd_api_key":   "api_key",
     "dd_app_key":   "app_key",
     "hosts": [
@@ -45,8 +48,16 @@
 } 
 ```
 
-- *Replace job.sh with the actual task script*
-- *set auto_retry to True to retry task if concurrent run is detected*
+- **ssh_user**: *remote ssh user for running task*
+- **task**: *Replace job.sh with the actual task script*
+- **auto_retry**: *set to **True** to keep retrying task if concurrent run is detected*
+- **retry_sec**: *seconds to wait before retry (only if **auto_retry** is set to **True**)*
+- **slack**: *lets you **Enable** or **Disable** Slack notifications*
+- **slack_api**: *Slack's webhook URL*
+- **datadog**: *lets you **Enable** or **Disable** posts to Datadog*
+- **dd_api_key**: *Datadog's API key*
+- **dd_app_key**: *Datadog's APP key*
+- **hosts**: *host/s for task to run on*
 
 #### Running Task
 
