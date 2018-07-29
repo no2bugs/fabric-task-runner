@@ -80,9 +80,8 @@ def check_remote_task(servers, backoff, job):
                         print('Waiting 5 minutes\n')
                         notify_slack('Waiting 5 minutes')
                         time.sleep(300)
-                        task_running = run('if ps aux | grep "' + job + '" | grep -v grep > /dev/null; then echo True; fi').stdout.strip()
                         post_datadog(0)
-                        check_remote_task(servers,
+                        check_remote_task(servers=config()['hosts'],
                                           backoff=config()['auto_retry'],
                                           job=config()['task'])
 
@@ -137,7 +136,6 @@ def execute(h_ls, job):
         print('Something went wrong on', rand_host, error)
         notify_slack('Something went wrong on ' + rand_host + error)
         post_datadog(-1)
-        execute(h_ls)
 
 
 def run_task():
