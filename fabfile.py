@@ -30,9 +30,13 @@ def notify_slack(msg):
                 headers={'Content-Type': 'application/json'}
             )
             if response.status_code != 200:
-                raise ValueError(response.status_code, response.text)
+                raise ValueError(response.status_code, response.reason, response.content)
+        except ValueError as e:
+            print('Error: Bad Response from Slack')
+            print(e)
         except Exception as e:
-            print('Error: Something went wrong when connecting to slack\n', e)
+            print('Error: Something went wrong when connecting to slack')
+            print(e)
     else:
         pass
 
@@ -52,7 +56,8 @@ def post_datadog(status):
 
             api.Metric.send(metric='task.status', tags=[config()['task']], points=(now, status))
         except Exception as e:
-            print('Error: Unable to post status to Datadog\n', e)
+            print('Error: Unable to post status to Datadog')
+            print(e)
     else:
         pass
 
@@ -104,12 +109,12 @@ def check_remote_task(servers, backoff, job):
                     post_datadog(0)
                     sys.exit(1)
     except Exception as e:
+        notify_slack('Error: Something went wrong when connecting to ' + each)
+        post_datadog(-1)
         print(time.strftime("%m/%d/%Y %H:%M:%S"))
-        print('Error: Something went wrong on', each)
-        notify_slack('Error: Something went wrong on ' + each)
+        print('Error: Something went wrong when connecting to ' + each)
         print(e)
         print('Exiting...')
-        post_datadog(-1)
         sys.exit(1)
 
 
@@ -140,7 +145,8 @@ def execute(h_ls, job):
             notify_slack('Duration:  ' + str(t_finish))
             post_datadog(1)
     except Exception as error:
-        print('Error: Something went wrong on', rand_host, error)
+        print('Error: Something went wrong on', rand_host)
+        print(error)
         notify_slack('Error: Something went wrong on ' + rand_host + error)
         post_datadog(-1)
 
