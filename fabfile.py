@@ -20,35 +20,41 @@ def config():
 
 
 def notify_slack(msg):
-    try:
-        webhook_url = config()['slack_api']
-        slack_data = {'text': msg}
+    if config()['slack'] == 'Enable':
+        try:
+            webhook_url = config()['slack_api']
+            slack_data = {'text': msg}
 
-        response = requests.post(
-            webhook_url, data=json.dumps(slack_data),
-            headers={'Content-Type': 'application/json'}
-        )
-        if response.status_code != 200:
-            raise ValueError(response.status_code, response.text)
-    except Exception as e:
-        print('Error: Something went wrong when connecting to slack\n', e)
+            response = requests.post(
+                webhook_url, data=json.dumps(slack_data),
+                headers={'Content-Type': 'application/json'}
+            )
+            if response.status_code != 200:
+                raise ValueError(response.status_code, response.text)
+        except Exception as e:
+            print('Error: Something went wrong when connecting to slack\n', e)
+    else:
+        pass
 
 
-# result: -1 = failed, 0 = warning, 1 = success
+# status: -1 = failed, 0 = warning, 1 = success
 def post_datadog(status):
-    options = {
-        'api_key': config()['dd_api_key'],
-        'app_key': config()['dd_app_key']
-    }
+    if config()['datadog'] == 'Enable':
+        options = {
+            'api_key': config()['dd_api_key'],
+            'app_key': config()['dd_app_key']
+        }
 
-    try:
-        initialize(**options)
+        try:
+            initialize(**options)
 
-        now = time.time()
+            now = time.time()
 
-        api.Metric.send(metric='task.status', tags=[config()['task']], points=(now, status))
-    except Exception as e:
-        print('Error: Unable to post status to Datadog\n', e)
+            api.Metric.send(metric='task.status', tags=[config()['task']], points=(now, status))
+        except Exception as e:
+            print('Error: Unable to post status to Datadog\n', e)
+    else:
+        pass
 
 
 # check if local fab job is already running
@@ -77,10 +83,11 @@ def check_remote_task(servers, backoff, job):
                         notify_slack('Found ' + job + ' running on: ' + each)
                         print('auto_retry:', 'True')
                         print(task)
-                        print('Waiting 5 minutes\n')
-                        notify_slack('Waiting 5 minutes')
-                        time.sleep(300)
+                        print('Will retry in ' + config()['retry_sec'] + ' seconds...\n')
+                        notify_slack('Will retry in ' + config()['retry_sec'] + ' seconds...')
                         post_datadog(0)
+                        time.sleep(int(config()['retry_sec']))
+                        task_running = run('if ps aux | grep "' + job + '" | grep -v grep > /dev/null; then echo True; fi').stdout.strip()
                         check_remote_task(servers=config()['hosts'],
                                           backoff=config()['auto_retry'],
                                           job=config()['task'])
@@ -112,7 +119,7 @@ def execute(h_ls, job):
     try:
         with settings(host_string=rand_host, warn_only=True), hide('output','running'):
             print('\nSTART:', time.strftime("%m/%d/%Y %H:%M:%S"))
-            notify_slack('START: ' + str(time.strftime("%m/%d/%Y %H:%M:%S")))
+            notify_slack('START:    ' + str(time.strftime("%m/%d/%Y %H:%M:%S")))
             notify_slack('Running ' + job + ' on: ' + rand_host)
             print('Running ' + job + ' on:', rand_host)
             put(job, '~/')
@@ -129,8 +136,8 @@ def execute(h_ls, job):
             print('Disk Util: ', out.split('\n')[3])
             print('FINISH:', time.strftime("%m/%d/%Y %H:%M:%S"))
             print('Duration:', t_finish)
-            notify_slack('FINISH: ' + str(time.strftime("%m/%d/%Y %H:%M:%S")))
-            notify_slack('Duration: ' + str(t_finish))
+            notify_slack('FINISH:    ' + str(time.strftime("%m/%d/%Y %H:%M:%S")))
+            notify_slack('Duration:  ' + str(t_finish))
             post_datadog(1)
     except Exception as error:
         print('Error: Something went wrong on', rand_host, error)

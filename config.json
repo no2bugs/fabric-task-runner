@@ -2,7 +2,10 @@
     "ssh_user":     "ec2-user",
     "task":         "job.sh",
     "auto_retry":   "False",
+    "retry_sec":    "300",
+    "slack":        "Enable",
     "slack_api":    "https://hooks.slack.com/services/a/b/token",
+    "datadog":      "Enable",
     "dd_api_key":   "api_key",
     "dd_app_key":   "app_key",
     "hosts": [
