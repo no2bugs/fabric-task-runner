@@ -48,7 +48,7 @@ def post_datadog(status):
 
         api.Metric.send(metric='task.status', tags=[config()['task']], points=(now, status))
     except Exception as e:
-        print('Unable to post status to Datadog\n', e)
+        print('Error: Unable to post status to Datadog\n', e)
 
 
 # check if local fab job is already running
@@ -73,8 +73,8 @@ def check_remote_task(servers, backoff, job):
                     while task_running:
                         print(time.strftime("%m/%d/%Y %H:%M:%S"))
                         task = run('ps aux | grep "' + job + '" | grep -v grep').stdout.strip()
-                        print('Found task running on', each)
-                        notify_slack('Found task running on: ' + each)
+                        print('Found ' + job + ' running on:', each)
+                        notify_slack('Found ' + job + ' running on: ' + each)
                         print('auto_retry:', 'True')
                         print(task)
                         print('Waiting 5 minutes\n')
@@ -87,8 +87,8 @@ def check_remote_task(servers, backoff, job):
 
                 if task_running and backoff == 'False':
                     print(time.strftime("%m/%d/%Y %H:%M:%S"))
-                    print('Found task running on', each)
-                    notify_slack('Found task running on: ' + each)
+                    print('Found ' + job + ' running on:', each)
+                    notify_slack('Found ' + job + ' running on: ' + each)
                     task = run('ps aux | grep "' + job + '" | grep -v grep').stdout.strip()
                     print('auto_retry:', 'False')
                     print(task)
@@ -98,8 +98,8 @@ def check_remote_task(servers, backoff, job):
                     sys.exit(1)
     except Exception as e:
         print(time.strftime("%m/%d/%Y %H:%M:%S"))
-        print('Something went wrong on', each)
-        notify_slack('Something went wrong on ' + each)
+        print('Error: Something went wrong on', each)
+        notify_slack('Error: Something went wrong on ' + each)
         print(e)
         print('Exiting...')
         post_datadog(-1)
@@ -113,8 +113,8 @@ def execute(h_ls, job):
         with settings(host_string=rand_host, warn_only=True), hide('output','running'):
             print('\nSTART:', time.strftime("%m/%d/%Y %H:%M:%S"))
             notify_slack('START: ' + str(time.strftime("%m/%d/%Y %H:%M:%S")))
-            notify_slack('Running task on: ' + rand_host)
-            print('Running task on:', rand_host)
+            notify_slack('Running ' + job + ' on: ' + rand_host)
+            print('Running ' + job + ' on:', rand_host)
             put(job, '~/')
             run('chmod 750 ~/' + job)
 
@@ -133,8 +133,8 @@ def execute(h_ls, job):
             notify_slack('Duration: ' + str(t_finish))
             post_datadog(1)
     except Exception as error:
-        print('Something went wrong on', rand_host, error)
-        notify_slack('Something went wrong on ' + rand_host + error)
+        print('Error: Something went wrong on', rand_host, error)
+        notify_slack('Error: Something went wrong on ' + rand_host + error)
         post_datadog(-1)
 
 
@@ -145,7 +145,7 @@ def run_task():
         job_name = config()['task']
         auto_retry = config()['auto_retry']
     except Exception as error:
-        print('Unable to load config\n', error)
+        print('Error: Unable to load config\n', error)
         sys.exit(1)
 
     notify_slack('BEGIN TASK: ' + job_name)
